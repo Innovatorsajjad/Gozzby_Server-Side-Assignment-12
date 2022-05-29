@@ -16,6 +16,10 @@ async function run() {
     try {
         await client.connect();
         console.log('DB Connected');
+        const productCollection = client.db('lowell-parts').collection('products');
+        const orderCollection = client.db('lowell-parts').collection('orders');
+        const userCollection = client.db('lowell-parts').collection('users');
+        const reviewCollection = client.db('lowell-parts').collection('reviews');
     } finally {
         //   await client.close();
     }
