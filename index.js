@@ -82,6 +82,94 @@ async function run() {
             const updatedOrder = await orderCollection.updateOne(filter, updateDoc);
             res.send(updatedOrder);
         })
+
+
+        
+        app.delete('/deleteOrder/:id', async (req, res) => {
+            const orderId = req.params.id;
+            const filter = { _id: ObjectId(orderId) };
+            const result = await orderCollection.deleteOne(filter);
+            res.send(result);
+        })
+
+        app.get('/order/:email', async (req, res) => {
+            const email = req.params.email;
+            const filter = { email: email }
+            const order = await orderCollection.find(filter).toArray();
+            res.send(order.reverse());
+        });
+
+        app.get('/order', async (req, res) => {
+            const orders = await orderCollection.find().toArray();
+            res.send(orders.reverse());
+        })
+
+        app.get('/payment/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) }
+            const order = await orderCollection.findOne(filter);
+            res.send(order);
+        });
+
+
+        app.get('/user', async (req, res) => {
+            const users = await userCollection.find().toArray();
+            res.send(users);
+        });
+
+        app.get('/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            const user = await userCollection.findOne({ email: email });
+            const isAdmin = user?.role === 'admin';
+            res.send({ admin: isAdmin })
+        });
+
+        app.put('/user/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            const filter = await userCollection.findOne({ email: email });
+            console.log(filter)
+            const updateDoc = {
+                $set: { role: 'admin' },
+            };
+            const result = await userCollection.updateOne(filter, updateDoc);
+            res.send(result);
+        });
+
+
+
+        app.put('/user/:email', async (req, res) => {
+            const email = req.params.email;
+            const user = req.body;
+            const filter = { email: email };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: user,
+            };
+            const result = await userCollection.updateOne(filter, updateDoc, options);
+            res.send(result);
+        });
+
+
+        app.get('/user/:email', async (req, res) => {
+            const email = req.params.email;
+            const filter = { email: email };
+            const user = await userCollection.findOne(filter);
+
+            res.send(user);
+        });
+
+        app.post('/review', async (req, res) => {
+            const review = req.body;
+            const result = await reviewCollection.insertOne(review);
+            res.send(result);
+        });
+        app.get('/review', async (req, res) => {
+            const query = {};
+            const cursor = await reviewCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result.reverse());
+        })
+
     } finally {
         //   await client.close();
     }
